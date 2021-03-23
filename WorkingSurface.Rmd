@@ -1,0 +1,545 @@
+---
+title: "TennisDataCleaning"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(readxl)
+library(BradleyTerry2)
+library(dplyr)
+library(tidyverse)
+library(Perc)
+library(data.table)
+Xclean<- read.csv("Cleaned Data.csv")
+X2017 <- read_excel("2017.xlsx")
+X2018<- read_excel("2018.xlsx")
+```
+
+
+```{r}
+data<-Xclean
+data<-X2017
+```
+
+
+```{r}
+#numeric data
+data$WRank <- as.numeric(data$WRank)
+data$LRank <- as.numeric(data$LRank)
+data$WPts <- as.numeric(data$WPts)
+data$LPts <- as.numeric(data$LPts)
+data$Winner <- as.character(data$Winner)
+data$Loser <- as.character(data$Loser)
+data$Surface <- as.character(data$Surface)
+data$Lsets <- as.numeric(data$Lsets)
+data$Series <- as.character(data$Series)
+
+
+#Cleaning for BT assumption
+
+x=vector()
+j=1
+for (i in 1:length(data$Loser)){
+
+  if(!(data$Loser[i] %in% data$Winner))
+    {
+    
+  x[j]<-i
+  j=j+1
+  
+  }
+  
+}
+data<-data[-x,]
+x=vector()
+j=1
+for (i in 1:length(data$Loser)){
+  if(data$Surface[i] == "Carpet")
+    {
+    
+  x[j]<-i
+  j=j+1
+  }
+}
+data<-data[-x,]
+########### Unplayed Games
+x=vector()
+j=1
+for (i in 1:length(data$Loser)){
+  if(data$Comment[i] == "Walkover" | data$Comment[i] == "Retired")
+    {
+    
+  x[j]<-i
+  j=j+1
+  }
+}
+data<-data[-x,]
+############# Del Potro
+j=1
+for (i in 1:length(data$Loser)){
+  if(data$Winner[i] == "Del Potro J. M.")
+    {
+    data$Winner[i]="Del Potro J.M."
+  }
+}
+
+j=1
+for (i in 1:length(data$Loser)){
+  if(data$Loser[i] == "Del Potro J. M.")
+    {
+    data$Loser[i]="Del Potro J.M."
+  }
+}
+############# ATP 250
+x=vector()
+j=1
+for (i in 1:length(data$Loser)){
+  if(data$Series[i] == "ATP250")
+    {
+    
+  x[j]<-i
+  j=j+1
+  }
+}
+data<-data[-x,]
+############# ATP
+x=vector()
+j=1
+for (i in 1:length(data$Loser)){
+  if(data$Series[i] == "ATP500")
+    {
+    
+  x[j]<-i
+  j=j+1
+  }
+}
+data<-data[-x,]
+#Higher ranked players
+x=vector()
+j=1
+for (i in 1:length(data$Loser)){
+  if(data$LRank[i] >200||data$WRank[i] >200)
+    {
+    
+  x[j]<-i
+  j=j+1
+  }
+}
+data<-data[-x,]
+
+##Assumption testing
+
+Conflictdata<-data.table(
+Winner =data$Winner,
+Loser =data$Loser
+)
+
+Matrix<-as.conflictmat(Conflictdata, weighted = FALSE, swap.order = FALSE)
+
+Results<-bt.test(Matrix)
+
+
+mle.d<-bradleyTerry(Matrix)
+mle.probs = convertToProb(mle.d[[1]],decreasing=TRUE)
+
+
+
+
+
+rm(abilities,BasicModel,df,GoodData,pr,Tennis,top20,top20plot)
+
+
+
+
+
+
+
+
+
+
+#############|| Seperating into Hard Clay Grass and cleaning them || ########
+dataHard<-subset(data,Surface=="Hard")
+dataClay<-subset(data,Surface=="Clay")
+dataGrass<-subset(data,Surface=="Grass")
+
+
+x=vector()
+j=1
+for (i in 1:length(dataClay$Loser)){
+
+  if(!(dataClay$Loser[i] %in% dataClay$Winner))
+    {
+  x[j]<-i
+  j=j+1
+  
+  }
+}  
+dataClay<-dataClay[-x,]
+##############################
+x=vector()
+j=1
+for (i in 1:length(dataHard$Loser)){
+
+  if(!(dataHard$Loser[i] %in% dataHard$Winner))
+    {
+  x[j]<-i
+  j=j+1
+  
+  }
+}  
+dataHard<-dataHard[-x,]
+##############################
+x=vector()
+j=1
+for (i in 1:length(dataGrass$Loser)){
+
+  if(!(dataGrass$Loser[i] %in% dataGrass$Winner))
+    {
+  x[j]<-i
+  j=j+1
+  
+  }
+}  
+dataGrass<-dataGrass[-x,]
+
+
+
+
+
+
+
+
+
+
+
+
+dataClay <- dataClay %>%
+dplyr::mutate(
+    player1 = factor(Winner, levels = unique(c(Winner, Loser))),
+    player2 = factor(Loser, levels = levels(player1)),
+  )
+dataHard <- dataHard %>%
+dplyr::mutate(
+    player1 = factor(Winner, levels = unique(c(Winner, Loser))),
+    player2 = factor(Loser, levels = levels(player1)),
+  )
+dataGrass <- dataGrass%>%
+dplyr::mutate(
+    player1 = factor(Winner, levels = unique(c(Winner, Loser))),
+    player2 = factor(Loser, levels = levels(player1)),
+  )
+
+
+
+
+
+
+
+
+
+
+
+
+
+#Date
+data$Date<-as.Date(data$Date,format="%Y-%m-%d")
+
+day<-as.Date("2017-11-19",format="%Y-%m-%d")
+ 
+ 
+data$Date<-difftime(data$Date,day,units=c("days"))
+data$Date<-as.numeric(data$Date)
+data$Date<-abs(data$Date)
+
+```
+
+```{r}
+data <- data %>%
+dplyr::mutate(
+    player1 = factor(Winner, levels = unique(c(Winner, Loser))),
+    player2 = factor(Loser, levels = levels(player1)),
+    Surfaceid = factor(Surface,levels = unique(Surface)),
+    GSid = factor(Best.of,levels = unique(Best.of)),
+    Lsetsid = factor(Lsets,levels = unique(Lsets)),
+    Seriesid = factor(Series,levels = unique(Series))
+  )
+
+Tennis=list()
+
+
+Tennis$NO1<-data$player1
+Tennis$NO2<-data$player2
+Tennis$NO1<-data.frame(ID=Tennis$NO1)
+Tennis$NO2<-data.frame(ID=Tennis$NO2)
+
+
+#####surface
+Tennisclay=list()
+Tennisclay$NO1<-dataClay$player1
+Tennisclay$NO2<-dataClay$player2
+Tennisclay$NO1<-data.frame(ID=Tennisclay$NO1)
+Tennisclay$NO2<-data.frame(ID=Tennisclay$NO2)
+
+Tennishard=list()
+Tennishard$NO1<-dataHard$player1
+Tennishard$NO2<-dataHard$player2
+Tennishard$NO1<-data.frame(ID=Tennishard$NO1)
+Tennishard$NO2<-data.frame(ID=Tennishard$NO2)
+
+Tennisgrass=list()
+Tennisgrass$NO1<-dataGrass$player1
+Tennisgrass$NO2<-dataGrass$player2
+Tennisgrass$NO1<-data.frame(ID=Tennisgrass$NO1)
+Tennisgrass$NO2<-data.frame(ID=Tennisgrass$NO2)
+#########
+
+
+Tennis$NO1$Surface <-(data$Surfaceid)
+Tennis$NO2$Surface <-(data$Surfaceid)
+Tennis$NO1$Series <-(data$Seriesid)
+Tennis$NO2$Series <-(data$Seriesid)
+
+
+###BETTING####
+
+data$B365W[is.na(data$B365W)]<-0
+data$B365L[is.na(data$B365L)]<-0
+data$EXL[is.na(data$EXL)]<-0
+data$EXW[is.na(data$EXW)]<-0
+data$CBL[is.na(data$CBL)]<-0
+data$CBW[is.na(data$CBW)]<-0
+data$PSL[is.na(data$PSL)]<-0
+data$PSW[is.na(data$PSW)]<-0
+data$UBL[is.na(data$UBL)]<-0
+data$UBW[is.na(data$UBW)]<-0
+
+Tennis$NO1$odds1<- data$B365W
+Tennis$NO2$odds1<- data$B365L
+Tennis$NO1$odds2 <-data$EXW
+Tennis$NO2$odds2 <-data$EXL
+Tennis$NO1$odds3<- data$CBW
+Tennis$NO2$odds3<- data$CBL
+Tennis$NO1$odds4<- data$PSW
+Tennis$NO2$odds4<- data$PSL
+Tennis$NO1$odds5<- data$UBW
+Tennis$NO2$odds5<- data$UBL
+
+###################
+
+Tennis$NO1$date <-data$Date
+Tennis$NO2$date <-data$Date
+```
+
+```{r}
+#Basic Model
+
+
+
+
+BasicModel <- BTm(player1=NO1,player2=NO2,id="ID",data=Tennis,refcat ="Nadal R." )
+
+
+#Surface Specific Models
+Claymodel <- BTm(player1=NO1,player2=NO2,data=Tennisclay,id="ID",refcat ="Nadal R." )
+Hardmodel <- BTm(player1=NO1,player2=NO2,data=Tennishard,id="ID",refcat ="Nadal R." )
+Grassmodel <- BTm(player1=NO1,player2=NO2,data=Tennisgrass,id="ID",refcat ="Nadal R." )
+
+#Covariate Models
+BettingModel <- BTm(player1=NO1,player2=NO2,formula =~odds1+odds2+odds3+odds4+odds5+(1|ID),id="ID",data=Tennis)
+BettingModel <- BTm(player1=NO1,player2=NO2,formula =~odds1+odds2+(1|ID),id="ID",data=Tennis)
+Surfacemodel <- BTm(player1=NO1,player2=NO2,formula =~odds+odds2+ID*Surface,id="ID",data=Tennis)
+Surfacemodel <- BTm(player1=NO1,player2=NO2,formula =~ID*Surface+(1|ID),id="ID",data=Tennis)
+```
+
+```{r}
+#Plots for basic model
+abilities <- BTabilities(BasicModel)
+
+abilities <- data.frame(
+  Name = rownames(abilities),
+  Ability = abilities[,1],
+  SE = abilities[,2]
+)
+## order
+abilities$Name <- factor(abilities$Name, levels = abilities$Name[order(abilities$Ability)])
+df<-abilities[order(-abilities$Ability),]
+
+#Normal Plot
+p<-ggplot(df,aes(Name,Ability,ymin=Ability-SE,ymax=Ability+SE))+geom_point()
+allplot<- (p +theme(axis.text.y = element_blank(),
+        axis.ticks.y = element_blank(),panel.border = element_rect(colour = "black", fill=NA, size=1))+ scale_x_discrete(name="Players") +coord_flip())
+#Players with enough data
+GoodData <- df
+## Rank
+Rank = 1:length(GoodData$Name)
+GoodData$new_col <- Rank
+## Top20
+top20 <-subset(GoodData,Rank<21)
+pr<-ggplot(top20,aes(Name,Ability,ymin=Ability-SE,ymax=Ability+SE))+geom_pointrange()
+top20plot<- (pr +theme(axis.title.y = element_blank(),axis.ticks.y = element_blank(),panel.border = element_rect(colour = "black", fill=NA, size=1)) +coord_flip())
+```
+
+
+```{r}
+#Plots for surface specific Models
+
+abilitiesC <- BTabilities(Claymodel)
+abilitiesH <- BTabilities(Hardmodel)
+abilitiesG <- BTabilities(Grassmodel)
+
+abilitiesC <- data.frame(
+  Name = rownames(abilitiesC),
+  Ability = abilitiesC[,1],
+  SE = abilitiesC[,2]
+)
+abilitiesH <- data.frame(
+  Name = rownames(abilitiesH),
+  Ability = abilitiesH[,1],
+  SE = abilitiesH[,2]
+)
+abilitiesG <- data.frame(
+  Name = rownames(abilitiesG),
+  Ability = abilitiesG[,1],
+  SE = abilitiesG[,2]
+)
+  ## order
+abilitiesC$Name <- factor(abilitiesC$Name, levels = abilitiesC$Name[order(abilitiesC$Ability)])
+dfC<-abilitiesC[order(-abilitiesC$Ability),]
+
+abilitiesH$Name <- factor(abilitiesH$Name, levels = abilitiesH$Name[order(abilitiesH$Ability)])
+dfH<-abilitiesH[order(-abilitiesH$Ability),]
+
+abilitiesG$Name <- factor(abilitiesG$Name, levels = abilitiesG$Name[order(abilitiesG$Ability)])
+dfG<-abilitiesG[order(-abilitiesG$Ability),]
+
+  #Full Data Plots
+C<-ggplot(dfC,aes(Name,Ability,ymin=Ability-SE,ymax=Ability+SE))+geom_point()
+allplotC<- (p +theme(axis.text.y = element_blank(),
+        axis.ticks.y = element_blank(),panel.border = element_rect(colour = "black", fill=NA, size=1))+ scale_x_discrete(name="Players")+scale_y_continuous(name="Ability (Clay Only)") +coord_flip())
+
+H<-ggplot(dfH,aes(Name,Ability,ymin=Ability-SE,ymax=Ability+SE))+geom_point()
+allplotH<- (p +theme(axis.text.y = element_blank(),
+        axis.ticks.y = element_blank(),panel.border = element_rect(colour = "black", fill=NA, size=1))+ scale_x_discrete(name="Players")+scale_y_continuous(name="Ability (Hard Court Only)") +coord_flip())
+
+G<-ggplot(dfG,aes(Name,Ability,ymin=Ability-SE,ymax=Ability+SE))+geom_point()
+allplotG<- (G +theme(axis.text.y = element_blank(),
+        axis.ticks.y = element_blank(),panel.border = element_rect(colour = "black", fill=NA, size=1))+ scale_x_discrete(name="Players")+scale_y_continuous(name="Ability (Grass Only)") +coord_flip())
+
+  #Players with enough data
+GoodDataC <- subset(dfC,SE<0.5)
+GoodDataH <- subset(dfH,SE<0.5)
+GoodDataG <- subset(dfG,SE<1)
+## Rank
+RankC = 1:length(GoodDataC$Name)
+RankH = 1:length(GoodDataH$Name)
+RankG = 1:length(GoodDataG$Name)
+GoodDataC$Rank <- RankC
+GoodDataH$Rank <- RankH
+GoodDataG$Rank<- RankG
+## Top20
+top20H <-subset(GoodDataH,Rank<21)
+Hr<-ggplot(top20H,aes(Name,Ability,ymin=Ability-SE,ymax=Ability+SE))+geom_pointrange()
+top20plotH<- (Hr +theme(axis.title.y = element_blank(),axis.ticks.y = element_blank(),panel.border = element_rect(colour = "black", fill=NA, size=1)) +coord_flip())+scale_y_continuous(name="Ability on Hard Court")
+
+top20C <-subset(GoodDataC,Rank<21)
+Cr<-ggplot(top20C,aes(Name,Ability,ymin=Ability-SE,ymax=Ability+SE))+geom_pointrange()
+top20plotC<- (Cr +theme(axis.title.y = element_blank(),axis.ticks.y = element_blank(),panel.border = element_rect(colour = "black", fill=NA, size=1)) +coord_flip())+scale_y_continuous(name="Ability on Clay")
+
+top20G <-subset(GoodDataG,Rank<21)
+Gr<-ggplot(top20G,aes(Name,Ability,ymin=Ability-SE,ymax=Ability+SE))+geom_pointrange()
+top20plotG<- (Gr +theme(axis.title.y = element_blank(),axis.ticks.y = element_blank(),panel.border = element_rect(colour = "black", fill=NA, size=1)) +coord_flip())+scale_y_continuous(name="Ability on Grass")
+```
+
+
+
+
+
+
+
+
+
+
+```{r}
+#prediction code
+Predictions<-predict(BasicModel, level = 1,type="response")[1:26725]
+count=0
+for(i in 1:26725){if(Predictions[i]>0.5){count = count+1}}
+prob<-count/26725
+
+
+
+#if you need to subset by date
+newdata$Date<-as.Date(newdata$Date,format="%Y-%m-%d")
+day<-as.Date("2018-11-19",format="%Y-%m-%d")
+newdata$Date<-difftime(newdata$Date,day,units=c("days"))
+newdata$Date<-as.numeric(newdata$Date)
+newdata$Date<-abs(newdata$Date)
+#By Surface
+newdataclay<-subset(newdata,Surface=="Clay")
+newdataGrass<-subset(newdata,Surface=="Grass")
+newdataHard<-subset(newdata,Surface=="Hard")
+
+#By Tournament
+
+newdata<- subset(X2018,Tournament=="Monte Carlo Masters")
+newdata<- subset(X2018,Tournament=="Australian Open")
+newdata<- subset(X2018,Tournament=="Wimbledon")
+
+
+
+#Change newdata into NO1 NO2 format
+newdata <- newdata %>%
+dplyr::mutate(
+    player1 = factor(Winner, levels = unique(c(Winner, Loser))),
+    player2 = factor(Loser, levels = levels(player1))
+  )
+
+
+Tennisnew = list()
+
+Tennisnew$NO1<-newdata$player1
+Tennisnew$NO2<-newdata$player2
+Tennisnew$NO1<-data.frame(ID=Tennisnew$NO1)
+Tennisnew$NO2<-data.frame(ID=Tennisnew$NO2)
+
+##odds
+newdata$EXL[is.na(newdata$EXL)]<-0
+newdata$EXW[is.na(newdata$EXW)]<-0
+newdata$B365L[is.na(newdata$B365L)]<-0
+newdata$B365W[is.na(newdata$B365W)]<-0
+Tennisnew$NO1$odds2 <-newdata$EXW
+Tennisnew$NO2$odds2 <-newdata$EXL
+Tennisnew$NO1$odds1<- newdata$B365W
+Tennisnew$NO2$odds1<- newdata$B365L
+
+
+##prediction for new data
+Predictions<-predict(Model, level = 1,type="response",newdata=Tennisnew)[1:length(newdata$ATP)]
+
+        #Remove NA's games for players who were not considered in the model
+            Predictions[is.na(Predictions)]<-0
+            Predictions[Predictions==0.5]<-0
+            x=vector()
+            j=1
+            for (i in 1:length(Predictions)){
+              if(Predictions[i]==0)
+                {
+                
+              x[j]<-i
+              j=j+1
+              }
+            }
+           
+
+Predictionsnew<-Predictions[-x]
+unknowns <- length(Predictions)-length(Predictionsnew)
+Predictions<-Predictions[-x]
+
+
+count=0
+for(i in 1:length(Predictions)){if(Predictions[i]>0.5){count = count+1}}
+prob<-count/length(Predictions)
+```
+
+
