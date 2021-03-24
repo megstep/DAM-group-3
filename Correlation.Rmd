@@ -1,0 +1,101 @@
+---
+title: "Correlation"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+setwd("C:/Users/megst/OneDrive/Documents/UNI/Y3/DAM/Data")
+library(readxl)
+library(BradleyTerry2)
+library(dplyr)
+library(tidyverse)
+
+BT <- read_excel("BT.xlsx")
+E <- read_excel("E.xlsx")
+X2018 <- read_excel("2018.xlsx")
+```
+
+
+```{r}
+p=101
+for (i in bt){
+  if (i %in% e) {
+    
+    c[i]<-match(i,e)
+    
+  }
+  else {
+    c[i]<-p
+    p=p+1
+    }
+}
+```
+
+
+
+
+```{r}
+res <- cor.test(a, c,  method="kendall")
+res
+```
+
+
+```{r}
+for (i in 1:100){
+  W<- match(i,X2018$WRank)
+  L<- match(i,X2018$LRank)
+  
+  if (W<L){
+    d[i]<- X2018$Winner[W]
+  }
+  else {
+    d[i]<- X2018$Loser[L]
+  }
+}
+```
+
+
+```{r}
+f<-list()
+
+p=101
+for (i in bt){
+  if (i %in% d) {
+    
+    f[i]<-match(i,d)
+    
+  }
+  else {
+    f[i]<-p
+    p=p+1
+    }
+}
+
+f<-as.numeric(f)
+
+res2 <- cor.test(a, f,  method="kendall")
+res2
+```
+
+```{r}
+g<-list()
+
+p=101
+for (i in e){
+  if (i %in% d) {
+    
+    g[i]<-match(i,d)
+    
+  }
+  else {
+    g[i]<-p
+    p=p+1
+    }
+}
+
+g<-as.numeric(g)
+
+res3 <- cor.test(a, g,  method="kendall")
+res3
+```

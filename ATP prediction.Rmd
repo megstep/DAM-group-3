@@ -1,0 +1,260 @@
+---
+title: "TennisBTATP"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+setwd("C:/Users/megst/OneDrive/Documents/UNI/Y3/DAM/Data")
+library(readxl)
+library(BradleyTerry2)
+library(dplyr)
+library(tidyverse)
+X2001 <- read_excel("2001.xls")
+X2002 <- read_excel("2002.xls")
+X2003 <- read_excel("2003.xls")
+X2004 <- read_excel("2004.xls")
+X2005 <- read_excel("2005.xls")
+X2006 <- read_excel("2006.xls")
+X2007 <- read_excel("2007.xls")
+X2008 <- read_excel("2008.xls")
+X2009 <- read_excel("2009.xls")
+X2010 <- read_excel("2010.xls")
+X2011 <- read_excel("2011.xls")
+X2012 <- read_excel("2012.xls")
+X2013 <- read_excel("2013.xlsx")
+X2014 <- read_excel("2014.xlsx")
+X2015 <- read_excel("2015.xlsx")
+X2016 <- read_excel("2016.xlsx")
+X2017 <- read_excel("2017.xlsx")
+X2018 <- read_excel("2018.xlsx")
+X2019 <- read_excel("2019.xlsx")
+X2020 <- read_excel("2020.xlsx")
+```
+
+
+
+```{r}
+Change2018<- X2018[12:13]
+Change2018[,2]<-lapply(Change2018[,2],as.numeric)
+Change2018[is.na(Change2018)]<-2000
+
+Change2018<-Change2018 %>%
+dplyr::mutate(compare=WRank-LRank)
+
+length(Change2018$compare[Change2018$compare<0])/length(Change2018$compare)*100
+```
+
+
+```{r}
+Remove2018<- X2018[12:13]
+Remove2018[,2]<-lapply(Remove2018[,2],as.numeric)
+Remove2018<-na.omit(Remove2018)
+
+Remove2018<-Remove2018 %>%
+dplyr::mutate(compare=WRank-LRank)
+
+length(Remove2018$compare[Remove2018$compare<0])/length(Remove2018$compare)*100
+```
+
+```{r}
+Change2019<- X2019[12:13]
+Change2019[,2]<-lapply(Change2019[,2],as.numeric)
+Change2019[,1]<-lapply(Change2019[,1],as.numeric)
+Change2019[is.na(Change2019)]<-2000
+
+Change2019<-Change2019 %>%
+dplyr::mutate(compare=WRank-LRank)
+
+length(Change2019$compare[Change2019$compare<0])/length(Change2019$compare)*100
+```
+
+```{r}
+Remove2019<- X2019[12:13]
+Remove2019[,2]<-lapply(Remove2019[,2],as.numeric)
+Remove2019[,1]<-lapply(Remove2019[,1],as.numeric)
+Remove2019<-na.omit(Remove2019)
+
+Remove2019<-Remove2019 %>%
+dplyr::mutate(compare=WRank-LRank)
+
+length(Remove2019$compare[Remove2019$compare<0])/length(Remove2019$compare)*100
+```
+
+```{r}
+Change2020<- X2020[12:13]
+Change2020[,2]<-lapply(Change2020[,2],as.numeric)
+Change2020[,1]<-lapply(Change2020[,1],as.numeric)
+Change2020[is.na(Change2020)]<-2000
+
+Change2020<-Change2020 %>%
+dplyr::mutate(compare=WRank-LRank)
+
+length(Change2020$compare[Change2020$compare<0])/length(Change2020$compare)*100
+```
+
+```{r}
+Remove2020<- X2020[12:13]
+Remove2020[,2]<-lapply(Remove2020[,2],as.numeric)
+Remove2020[,1]<-lapply(Remove2020[,1],as.numeric)
+Remove2020<-na.omit(Remove2020)
+
+Remove2020<-Remove2020 %>%
+dplyr::mutate(compare=WRank-LRank)
+
+length(Remove2020$compare[Remove2020$compare<0])/length(Remove2020$compare)*100
+```
+```{r}
+Bet365<- X2018[29:30]
+Bet365[,2]<-lapply(Bet365[,2],as.numeric)
+Bet365[,1]<-lapply(Bet365[,1],as.numeric)
+Bet365<-na.omit(Bet365)
+
+Bet365<-Bet365 %>%
+dplyr::mutate(compare=B365W-B365L)
+
+length(Bet365$compare[Bet365$compare<0])/length(Bet365$compare)*100
+```
+```{r}
+Expekt <- X2018[31:32]
+Expekt[,2]<-lapply(Expekt[,2],as.numeric)
+Expekt[,1]<-lapply(Expekt[,1],as.numeric)
+Expekt<-na.omit(Expekt)
+
+Expekt<-Expekt %>%
+dplyr::mutate(compare=EXW-EXL)
+
+length(Expekt$compare[Expekt$compare<0])/length(Expekt$compare)*100
+```
+```{r}
+Ladbrokes <- X2018[33:34]
+Ladbrokes[,2]<-lapply(Ladbrokes[,2],as.numeric)
+Ladbrokes[,1]<-lapply(Ladbrokes[,1],as.numeric)
+Ladbrokes<-na.omit(Ladbrokes)
+
+Ladbrokes<-Ladbrokes %>%
+dplyr::mutate(compare=LBW-LBL)
+
+length(Ladbrokes$compare[Ladbrokes$compare<0])/length(Ladbrokes$compare)*100
+```
+```{r}
+PS <- X2018[35:36]
+PS[,2]<-lapply(PS[,2],as.numeric)
+PS[,1]<-lapply(PS[,1],as.numeric)
+PS<-na.omit(PS)
+
+PS<-PS %>%
+dplyr::mutate(compare=PSW-PSL)
+
+length(PS$compare[PS$compare<0])/length(PS$compare)*100
+```
+```{r}
+PS <- X2018[35:36]
+PS[,2]<-lapply(PS[,2],as.numeric)
+PS[,1]<-lapply(PS[,1],as.numeric)
+PS<-na.omit(PS)
+
+PS<-PS %>%
+dplyr::mutate(compare=PSW-PSL)
+
+length(PS$compare[PS$compare<0])/length(PS$compare)*100
+```
+
+
+```{r}
+Maxx <- X2018[37:38]
+Maxx [,2]<-lapply(Maxx [,2],as.numeric)
+Maxx [,1]<-lapply(Maxx [,1],as.numeric)
+Maxx <-na.omit(Maxx )
+
+Maxx <-Maxx  %>%
+dplyr::mutate(compare=MaxW-MaxL)
+
+length(Maxx$compare[Maxx $compare<0])/length(Maxx $compare)*100
+```
+```{r}
+Av <- X2018[39:40]
+Av [,2]<-lapply(Av [,2],as.numeric)
+Av [,1]<-lapply(Av [,1],as.numeric)
+Av <-na.omit(Av )
+
+Av <-Av  %>%
+dplyr::mutate(compare=AvgW-AvgL)
+
+length(Av$compare[Av$compare<0])/length(Av$compare)*100
+```
+
+```{r}
+AO<-list()
+
+AO$Tournament<-X2018$Tournament[X2018$Tournament == 'Australian Open']
+AO$WRank<-X2018$WRank[X2018$Tournament == 'Australian Open']
+AO$LRank<-X2018$LRank[X2018$Tournament == 'Australian Open']
+
+AO<-data.frame(AO)
+
+AO[,3]<-sapply(AO[,3],as.numeric)
+AO <-na.omit(AO)
+
+AO<-AO %>%
+dplyr::mutate(compare=WRank-LRank)
+
+length(AO$compare[AO$compare<0])/length(AO$compare)*100
+```
+
+
+```{r}
+MC<-list()
+
+MC$Tournament<-X2018$Tournament[X2018$Tournament == 'Monte Carlo Masters']
+MC$WRank<-X2018$WRank[X2018$Tournament == 'Monte Carlo Masters']
+MC$LRank<-X2018$LRank[X2018$Tournament == 'Monte Carlo Masters']
+
+MC<-data.frame(MC)
+
+MC[,3]<-sapply(MC[,3],as.numeric)
+MC <-na.omit(MC )
+
+MC <-MC  %>%
+dplyr::mutate(compare=WRank-LRank)
+
+length(MC$compare[MC$compare<0])/length(MC$compare)*100
+```
+
+```{r}
+W<-list()
+
+W$Tournament<-X2018$Tournament[X2018$Tournament == 'Wimbledon']
+W$WRank<-X2018$WRank[X2018$Tournament == 'Wimbledon']
+W$LRank<-X2018$LRank[X2018$Tournament == 'Wimbledon']
+
+W<-data.frame(W)
+
+W[,3]<-sapply(W[,3],as.numeric)
+W <-na.omit(W)
+
+W <-W  %>%
+dplyr::mutate(compare=WRank-LRank)
+
+length(W$compare[W$compare<0])/length(W$compare)*100
+```
+
+
+```{r}
+BAO<-list()
+
+BAO$Tournament<-X2018$Tournament[X2018$Tournament == 'Wimbledon']
+BAO$WRank<-X2018$B365W[X2018$Tournament == 'Wimbledon']
+BAO$LRank<-X2018$B365L[X2018$Tournament == 'Wimbledon']
+
+BAO<-data.frame(BAO)
+
+BAO[,3]<-sapply(BAO[,3],as.numeric)
+BAO <-na.omit(BAO)
+
+BAO<-BAO %>%
+dplyr::mutate(compare=WRank-LRank)
+
+length(BAO$compare[BAO$compare<0])/length(BAO$compare)*100
+```
+

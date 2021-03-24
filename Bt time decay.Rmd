@@ -1,0 +1,99 @@
+---
+title: "BT Time Decay"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+setwd("C:/Users/megst/OneDrive/Documents/UNI/Y3/DAM/Data")
+library(readxl)
+library(BradleyTerry2)
+library(dplyr)
+library(tidyverse)
+X2001 <- read_excel("2001.xls")
+X2002 <- read_excel("2002.xls")
+X2003 <- read_excel("2003.xls")
+X2004 <- read_excel("2004.xls")
+X2005 <- read_excel("2005.xls")
+X2006 <- read_excel("2006.xls")
+X2007 <- read_excel("2007.xls")
+X2008 <- read_excel("2008.xls")
+X2009 <- read_excel("2009.xls")
+X2010 <- read_excel("2010.xls")
+X2011 <- read_excel("2011.xls")
+X2012 <- read_excel("2012.xls")
+X2013 <- read_excel("2013.xlsx")
+X2014 <- read_excel("2014.xlsx")
+X2015 <- read_excel("2015.xlsx")
+X2016 <- read_excel("2016.xlsx")
+X2017 <- read_excel("2017.xlsx")
+X2018 <- read_excel("2018.xlsx")
+X2019 <- read_excel("2019.xlsx")
+X2020 <- read_excel("2020.xlsx")
+```
+
+```{r}
+timedecay<-X2017
+timedecay<-subset(timedecay,select= c(Date,Winner,Loser))
+timedecay<-data.frame(timedecay,1,0)
+timedecay<-timedecay[,c(2,3,4,5,1)]
+timedecay$Date<-as.Date(timedecay$Date,format="%Y/%m/%d")
+
+day<-as.Date("2017/12/31",format="%Y/%m/%d")
+ 
+ 
+timedecay$Date<-difftime(timedecay$Date,day,units=c("days"))
+timedecay$Date<-as.numeric(timedecay$Date)
+timedecay$Date<-abs(timedecay$Date)
+
+timedecay
+```
+
+```{r}
+data <- X2017
+data <- data %>%
+dplyr::mutate(
+    player1 = factor(Winner, levels = unique(c(Winner, Loser))),
+    
+    player2 = factor(Loser, levels = levels(player1)),
+    
+    
+    
+  )
+
+fit<- BTm(1,player1,player2,data = data)
+
+abilities <- BTabilities(fit)
+
+abilities <- data.frame(
+  Name = rownames(abilities),
+  Ability = abilities[,1],
+  SE = abilities[,2]
+)
+```
+
+
+
+```{r}
+y1 <- BTdecayLasso(timedecay, abilities, lambda = 0, 
+                   decay.rate = 0.005, fixed = "Lorenzi P.")
+```
+
+```{r}
+NFL2010
+```
+
+```{r}
+BTdataframe(timedecay,home=FALSE)
+```
+
+```{r}
+for (i in 1:length(timedecay[,1])){
+  
+  if 
+  
+}
+```
+
+
+
